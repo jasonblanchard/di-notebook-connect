@@ -1,0 +1,83 @@
+syntax = "proto3";
+
+package protobuf.notebook.v1;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/jasonblanchard/di-notebook-connect/gen/protobuf/notebook/v1;notebookv1";
+
+message GetEntryRequest {
+  string id = 1;
+}
+
+message Entry {
+  string id = 1;
+  string text = 2;
+  string creator_id = 3;
+  google.protobuf.Timestamp created_at = 4;
+  google.protobuf.Timestamp updated_at = 5;
+  google.protobuf.Timestamp delete_time = 6;
+}
+
+message CreateEntryRequest {
+  string text = 1;
+}
+
+message CreateEntryResponse {
+  Entry entry = 1;
+}
+
+message GetEntryResponse {
+  Entry entry = 1;
+}
+
+message UpdateEntryRequest {
+  string id = 1;
+  string text = 2;
+}
+
+message UpdateEntryResponse {
+  Entry entry = 1;
+}
+
+message ListEntriesRequest {
+  int32 page_size = 1;
+  string page_token = 2;
+}
+
+message ListEntriesResponse {
+  repeated Entry entries = 1;
+  string next_page_token = 2;
+  int32 total_size = 3;
+  bool has_next_page = 4;
+}
+
+message DeleteEntryRequest {
+  string id = 1;
+}
+
+message DeleteEntryResponse {
+  Entry entry = 1;
+}
+
+message UndeleteEntryRequest {
+  string id = 1;
+}
+
+message UndeleteEntryResponse {
+  Entry entry = 1;
+}
+
+service NotebookService {
+  rpc GetEntry(GetEntryRequest) returns (GetEntryResponse) {}
+
+  rpc CreateEntry(CreateEntryRequest) returns (CreateEntryResponse) {}
+
+  rpc UpdateEntry(UpdateEntryRequest) returns (UpdateEntryResponse) {}
+
+  rpc ListEntries(ListEntriesRequest) returns (ListEntriesResponse) {}
+
+  rpc DeleteEntry(DeleteEntryRequest) returns (DeleteEntryResponse) {}
+
+  rpc UndeleteEntry(UndeleteEntryRequest) returns (UndeleteEntryResponse) {}
+}

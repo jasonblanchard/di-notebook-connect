@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package protobuf.ping.v1;
+
+option go_package = "github.com/jasonblanchard/di-notebook-connect/gen/protobuf/ping/v1;pingv1";
+
+message PingRequest {}
+
+message PingResponse {
+  string sound = 1;
+}
+
+service PingService {
+  rpc Ping(PingRequest) returns (PingResponse) {}
+}
