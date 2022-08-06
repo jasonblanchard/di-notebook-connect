@@ -71,13 +71,13 @@ message UndeleteEntryResponse {
 service NotebookService {
   rpc GetEntry(GetEntryRequest) returns (GetEntryResponse) {}
 
-  rpc CreateEntry(CreateEntryRequest) returns (CreateEntryResponse) {}
+  // rpc CreateEntry(CreateEntryRequest) returns (CreateEntryResponse) {}
 
-  rpc UpdateEntry(UpdateEntryRequest) returns (UpdateEntryResponse) {}
+  // rpc UpdateEntry(UpdateEntryRequest) returns (UpdateEntryResponse) {}
 
-  rpc ListEntries(ListEntriesRequest) returns (ListEntriesResponse) {}
+  // rpc ListEntries(ListEntriesRequest) returns (ListEntriesResponse) {}
 
-  rpc DeleteEntry(DeleteEntryRequest) returns (DeleteEntryResponse) {}
+  // rpc DeleteEntry(DeleteEntryRequest) returns (DeleteEntryResponse) {}
 
-  rpc UndeleteEntry(UndeleteEntryRequest) returns (UndeleteEntryResponse) {}
+  // rpc UndeleteEntry(UndeleteEntryRequest) returns (UndeleteEntryResponse) {}
 }

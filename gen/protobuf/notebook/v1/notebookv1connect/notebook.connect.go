@@ -28,11 +28,6 @@ const (
 // NotebookServiceClient is a client for the protobuf.notebook.v1.NotebookService service.
 type NotebookServiceClient interface {
 	GetEntry(context.Context, *connect_go.Request[v1.GetEntryRequest]) (*connect_go.Response[v1.GetEntryResponse], error)
-	CreateEntry(context.Context, *connect_go.Request[v1.CreateEntryRequest]) (*connect_go.Response[v1.CreateEntryResponse], error)
-	UpdateEntry(context.Context, *connect_go.Request[v1.UpdateEntryRequest]) (*connect_go.Response[v1.UpdateEntryResponse], error)
-	ListEntries(context.Context, *connect_go.Request[v1.ListEntriesRequest]) (*connect_go.Response[v1.ListEntriesResponse], error)
-	DeleteEntry(context.Context, *connect_go.Request[v1.DeleteEntryRequest]) (*connect_go.Response[v1.DeleteEntryResponse], error)
-	UndeleteEntry(context.Context, *connect_go.Request[v1.UndeleteEntryRequest]) (*connect_go.Response[v1.UndeleteEntryResponse], error)
 }
 
 // NewNotebookServiceClient constructs a client for the protobuf.notebook.v1.NotebookService
@@ -50,42 +45,12 @@ func NewNotebookServiceClient(httpClient connect_go.HTTPClient, baseURL string, 
 			baseURL+"/protobuf.notebook.v1.NotebookService/GetEntry",
 			opts...,
 		),
-		createEntry: connect_go.NewClient[v1.CreateEntryRequest, v1.CreateEntryResponse](
-			httpClient,
-			baseURL+"/protobuf.notebook.v1.NotebookService/CreateEntry",
-			opts...,
-		),
-		updateEntry: connect_go.NewClient[v1.UpdateEntryRequest, v1.UpdateEntryResponse](
-			httpClient,
-			baseURL+"/protobuf.notebook.v1.NotebookService/UpdateEntry",
-			opts...,
-		),
-		listEntries: connect_go.NewClient[v1.ListEntriesRequest, v1.ListEntriesResponse](
-			httpClient,
-			baseURL+"/protobuf.notebook.v1.NotebookService/ListEntries",
-			opts...,
-		),
-		deleteEntry: connect_go.NewClient[v1.DeleteEntryRequest, v1.DeleteEntryResponse](
-			httpClient,
-			baseURL+"/protobuf.notebook.v1.NotebookService/DeleteEntry",
-			opts...,
-		),
-		undeleteEntry: connect_go.NewClient[v1.UndeleteEntryRequest, v1.UndeleteEntryResponse](
-			httpClient,
-			baseURL+"/protobuf.notebook.v1.NotebookService/UndeleteEntry",
-			opts...,
-		),
 	}
 }
 
 // notebookServiceClient implements NotebookServiceClient.
 type notebookServiceClient struct {
-	getEntry      *connect_go.Client[v1.GetEntryRequest, v1.GetEntryResponse]
-	createEntry   *connect_go.Client[v1.CreateEntryRequest, v1.CreateEntryResponse]
-	updateEntry   *connect_go.Client[v1.UpdateEntryRequest, v1.UpdateEntryResponse]
-	listEntries   *connect_go.Client[v1.ListEntriesRequest, v1.ListEntriesResponse]
-	deleteEntry   *connect_go.Client[v1.DeleteEntryRequest, v1.DeleteEntryResponse]
-	undeleteEntry *connect_go.Client[v1.UndeleteEntryRequest, v1.UndeleteEntryResponse]
+	getEntry *connect_go.Client[v1.GetEntryRequest, v1.GetEntryResponse]
 }
 
 // GetEntry calls protobuf.notebook.v1.NotebookService.GetEntry.
@@ -93,39 +58,9 @@ func (c *notebookServiceClient) GetEntry(ctx context.Context, req *connect_go.Re
 	return c.getEntry.CallUnary(ctx, req)
 }
 
-// CreateEntry calls protobuf.notebook.v1.NotebookService.CreateEntry.
-func (c *notebookServiceClient) CreateEntry(ctx context.Context, req *connect_go.Request[v1.CreateEntryRequest]) (*connect_go.Response[v1.CreateEntryResponse], error) {
-	return c.createEntry.CallUnary(ctx, req)
-}
-
-// UpdateEntry calls protobuf.notebook.v1.NotebookService.UpdateEntry.
-func (c *notebookServiceClient) UpdateEntry(ctx context.Context, req *connect_go.Request[v1.UpdateEntryRequest]) (*connect_go.Response[v1.UpdateEntryResponse], error) {
-	return c.updateEntry.CallUnary(ctx, req)
-}
-
-// ListEntries calls protobuf.notebook.v1.NotebookService.ListEntries.
-func (c *notebookServiceClient) ListEntries(ctx context.Context, req *connect_go.Request[v1.ListEntriesRequest]) (*connect_go.Response[v1.ListEntriesResponse], error) {
-	return c.listEntries.CallUnary(ctx, req)
-}
-
-// DeleteEntry calls protobuf.notebook.v1.NotebookService.DeleteEntry.
-func (c *notebookServiceClient) DeleteEntry(ctx context.Context, req *connect_go.Request[v1.DeleteEntryRequest]) (*connect_go.Response[v1.DeleteEntryResponse], error) {
-	return c.deleteEntry.CallUnary(ctx, req)
-}
-
-// UndeleteEntry calls protobuf.notebook.v1.NotebookService.UndeleteEntry.
-func (c *notebookServiceClient) UndeleteEntry(ctx context.Context, req *connect_go.Request[v1.UndeleteEntryRequest]) (*connect_go.Response[v1.UndeleteEntryResponse], error) {
-	return c.undeleteEntry.CallUnary(ctx, req)
-}
-
 // NotebookServiceHandler is an implementation of the protobuf.notebook.v1.NotebookService service.
 type NotebookServiceHandler interface {
 	GetEntry(context.Context, *connect_go.Request[v1.GetEntryRequest]) (*connect_go.Response[v1.GetEntryResponse], error)
-	CreateEntry(context.Context, *connect_go.Request[v1.CreateEntryRequest]) (*connect_go.Response[v1.CreateEntryResponse], error)
-	UpdateEntry(context.Context, *connect_go.Request[v1.UpdateEntryRequest]) (*connect_go.Response[v1.UpdateEntryResponse], error)
-	ListEntries(context.Context, *connect_go.Request[v1.ListEntriesRequest]) (*connect_go.Response[v1.ListEntriesResponse], error)
-	DeleteEntry(context.Context, *connect_go.Request[v1.DeleteEntryRequest]) (*connect_go.Response[v1.DeleteEntryResponse], error)
-	UndeleteEntry(context.Context, *connect_go.Request[v1.UndeleteEntryRequest]) (*connect_go.Response[v1.UndeleteEntryResponse], error)
 }
 
 // NewNotebookServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -140,31 +75,6 @@ func NewNotebookServiceHandler(svc NotebookServiceHandler, opts ...connect_go.Ha
 		svc.GetEntry,
 		opts...,
 	))
-	mux.Handle("/protobuf.notebook.v1.NotebookService/CreateEntry", connect_go.NewUnaryHandler(
-		"/protobuf.notebook.v1.NotebookService/CreateEntry",
-		svc.CreateEntry,
-		opts...,
-	))
-	mux.Handle("/protobuf.notebook.v1.NotebookService/UpdateEntry", connect_go.NewUnaryHandler(
-		"/protobuf.notebook.v1.NotebookService/UpdateEntry",
-		svc.UpdateEntry,
-		opts...,
-	))
-	mux.Handle("/protobuf.notebook.v1.NotebookService/ListEntries", connect_go.NewUnaryHandler(
-		"/protobuf.notebook.v1.NotebookService/ListEntries",
-		svc.ListEntries,
-		opts...,
-	))
-	mux.Handle("/protobuf.notebook.v1.NotebookService/DeleteEntry", connect_go.NewUnaryHandler(
-		"/protobuf.notebook.v1.NotebookService/DeleteEntry",
-		svc.DeleteEntry,
-		opts...,
-	))
-	mux.Handle("/protobuf.notebook.v1.NotebookService/UndeleteEntry", connect_go.NewUnaryHandler(
-		"/protobuf.notebook.v1.NotebookService/UndeleteEntry",
-		svc.UndeleteEntry,
-		opts...,
-	))
 	return "/protobuf.notebook.v1.NotebookService/", mux
 }
 
@@ -173,24 +83,4 @@ type UnimplementedNotebookServiceHandler struct{}
 
 func (UnimplementedNotebookServiceHandler) GetEntry(context.Context, *connect_go.Request[v1.GetEntryRequest]) (*connect_go.Response[v1.GetEntryResponse], error) {
 	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("protobuf.notebook.v1.NotebookService.GetEntry is not implemented"))
-}
-
-func (UnimplementedNotebookServiceHandler) CreateEntry(context.Context, *connect_go.Request[v1.CreateEntryRequest]) (*connect_go.Response[v1.CreateEntryResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("protobuf.notebook.v1.NotebookService.CreateEntry is not implemented"))
-}
-
-func (UnimplementedNotebookServiceHandler) UpdateEntry(context.Context, *connect_go.Request[v1.UpdateEntryRequest]) (*connect_go.Response[v1.UpdateEntryResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("protobuf.notebook.v1.NotebookService.UpdateEntry is not implemented"))
-}
-
-func (UnimplementedNotebookServiceHandler) ListEntries(context.Context, *connect_go.Request[v1.ListEntriesRequest]) (*connect_go.Response[v1.ListEntriesResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("protobuf.notebook.v1.NotebookService.ListEntries is not implemented"))
-}
-
-func (UnimplementedNotebookServiceHandler) DeleteEntry(context.Context, *connect_go.Request[v1.DeleteEntryRequest]) (*connect_go.Response[v1.DeleteEntryResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("protobuf.notebook.v1.NotebookService.DeleteEntry is not implemented"))
-}
-
-func (UnimplementedNotebookServiceHandler) UndeleteEntry(context.Context, *connect_go.Request[v1.UndeleteEntryRequest]) (*connect_go.Response[v1.UndeleteEntryResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("protobuf.notebook.v1.NotebookService.UndeleteEntry is not implemented"))
 }
