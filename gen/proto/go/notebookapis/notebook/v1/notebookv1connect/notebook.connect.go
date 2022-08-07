@@ -8,7 +8,7 @@ import (
 	context "context"
 	errors "errors"
 	connect_go "github.com/bufbuild/connect-go"
-	v1 "github.com/jasonblanchard/di-notebook-connect/gen/notebookapis/notebook/v1"
+	v1 "github.com/jasonblanchard/di-notebook-connect/gen/proto/go/notebookapis/notebook/v1"
 	http "net/http"
 	strings "strings"
 )

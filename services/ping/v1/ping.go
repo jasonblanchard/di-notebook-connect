@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/bufbuild/connect-go"
-	pingv1 "github.com/jasonblanchard/di-notebook-connect/gen/notebookapis/ping/v1"
+	pingv1 "github.com/jasonblanchard/di-notebook-connect/gen/proto/go/notebookapis/ping/v1"
 )
 
 type Service struct{}

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/jasonblanchard/di-notebook-connect/gen/notebookapis/ping/v1/pingv1connect"
+	"github.com/jasonblanchard/di-notebook-connect/gen/proto/go/notebookapis/ping/v1/pingv1connect"
 
 	pingv1 "github.com/jasonblanchard/di-notebook-connect/services/ping/v1"
 	_ "github.com/lib/pq"
