@@ -28,6 +28,7 @@ const (
 // NotebookServiceClient is a client for the notebook.v1.NotebookService service.
 type NotebookServiceClient interface {
 	GetEntry(context.Context, *connect_go.Request[v1.GetEntryRequest]) (*connect_go.Response[v1.GetEntryResponse], error)
+	ListEntries(context.Context, *connect_go.Request[v1.ListEntriesRequest]) (*connect_go.Response[v1.ListEntriesResponse], error)
 }
 
 // NewNotebookServiceClient constructs a client for the notebook.v1.NotebookService service. By
@@ -45,12 +46,18 @@ func NewNotebookServiceClient(httpClient connect_go.HTTPClient, baseURL string, 
 			baseURL+"/notebook.v1.NotebookService/GetEntry",
 			opts...,
 		),
+		listEntries: connect_go.NewClient[v1.ListEntriesRequest, v1.ListEntriesResponse](
+			httpClient,
+			baseURL+"/notebook.v1.NotebookService/ListEntries",
+			opts...,
+		),
 	}
 }
 
 // notebookServiceClient implements NotebookServiceClient.
 type notebookServiceClient struct {
-	getEntry *connect_go.Client[v1.GetEntryRequest, v1.GetEntryResponse]
+	getEntry    *connect_go.Client[v1.GetEntryRequest, v1.GetEntryResponse]
+	listEntries *connect_go.Client[v1.ListEntriesRequest, v1.ListEntriesResponse]
 }
 
 // GetEntry calls notebook.v1.NotebookService.GetEntry.
@@ -58,9 +65,15 @@ func (c *notebookServiceClient) GetEntry(ctx context.Context, req *connect_go.Re
 	return c.getEntry.CallUnary(ctx, req)
 }
 
+// ListEntries calls notebook.v1.NotebookService.ListEntries.
+func (c *notebookServiceClient) ListEntries(ctx context.Context, req *connect_go.Request[v1.ListEntriesRequest]) (*connect_go.Response[v1.ListEntriesResponse], error) {
+	return c.listEntries.CallUnary(ctx, req)
+}
+
 // NotebookServiceHandler is an implementation of the notebook.v1.NotebookService service.
 type NotebookServiceHandler interface {
 	GetEntry(context.Context, *connect_go.Request[v1.GetEntryRequest]) (*connect_go.Response[v1.GetEntryResponse], error)
+	ListEntries(context.Context, *connect_go.Request[v1.ListEntriesRequest]) (*connect_go.Response[v1.ListEntriesResponse], error)
 }
 
 // NewNotebookServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -75,6 +88,11 @@ func NewNotebookServiceHandler(svc NotebookServiceHandler, opts ...connect_go.Ha
 		svc.GetEntry,
 		opts...,
 	))
+	mux.Handle("/notebook.v1.NotebookService/ListEntries", connect_go.NewUnaryHandler(
+		"/notebook.v1.NotebookService/ListEntries",
+		svc.ListEntries,
+		opts...,
+	))
 	return "/notebook.v1.NotebookService/", mux
 }
 
@@ -83,4 +101,8 @@ type UnimplementedNotebookServiceHandler struct{}
 
 func (UnimplementedNotebookServiceHandler) GetEntry(context.Context, *connect_go.Request[v1.GetEntryRequest]) (*connect_go.Response[v1.GetEntryResponse], error) {
 	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("notebook.v1.NotebookService.GetEntry is not implemented"))
+}
+
+func (UnimplementedNotebookServiceHandler) ListEntries(context.Context, *connect_go.Request[v1.ListEntriesRequest]) (*connect_go.Response[v1.ListEntriesResponse], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("notebook.v1.NotebookService.ListEntries is not implemented"))
 }

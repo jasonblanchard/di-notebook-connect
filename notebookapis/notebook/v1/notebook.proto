@@ -4,10 +4,6 @@ package notebook.v1;
 
 import "google/protobuf/timestamp.proto";
 
-message GetEntryRequest {
-  string id = 1;
-}
-
 message Entry {
   string id = 1;
   string text = 2;
@@ -17,15 +13,19 @@ message Entry {
   google.protobuf.Timestamp delete_time = 6;
 }
 
+message GetEntryRequest {
+  string id = 1;
+}
+
+message GetEntryResponse {
+  Entry entry = 1;
+}
+
 message CreateEntryRequest {
   string text = 1;
 }
 
 message CreateEntryResponse {
-  Entry entry = 1;
-}
-
-message GetEntryResponse {
   Entry entry = 1;
 }
 
@@ -73,7 +73,7 @@ service NotebookService {
 
   // rpc UpdateEntry(UpdateEntryRequest) returns (UpdateEntryResponse) {}
 
-  // rpc ListEntries(ListEntriesRequest) returns (ListEntriesResponse) {}
+  rpc ListEntries(ListEntriesRequest) returns (ListEntriesResponse) {}
 
   // rpc DeleteEntry(DeleteEntryRequest) returns (DeleteEntryResponse) {}
 
