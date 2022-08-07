@@ -1,10 +1,10 @@
 syntax = "proto3";
 
-package protobuf.notebook.v1;
+package notebook.v1;
 
 import "google/protobuf/timestamp.proto";
 
-option go_package = "github.com/jasonblanchard/di-notebook-connect/gen/protobuf/notebook/v1;notebookv1";
+option go_package = "github.com/jasonblanchard/di-notebook-connect/gen/notebookapis/notebook/v1;notebookv1";
 
 message GetEntryRequest {
   string id = 1;

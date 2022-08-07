@@ -1,9 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 
-	"github.com/jasonblanchard/di-notebook-connect/gen/protobuf/ping/v1/pingv1connect"
+	"github.com/jasonblanchard/di-notebook-connect/gen/notebookapis/ping/v1/pingv1connect"
 
 	pingv1 "github.com/jasonblanchard/di-notebook-connect/services/ping/v1"
 	_ "github.com/lib/pq"
@@ -16,6 +17,7 @@ func main() {
 	mux := http.NewServeMux()
 	pingpath, pinghandler := pingv1connect.NewPingServiceHandler(pingService)
 	mux.Handle(pingpath, pinghandler)
+	fmt.Println("Starting server on port 8080")
 	http.ListenAndServe(
 		"localhost:8080",
 		// Use h2c so we can serve HTTP/2 without TLS.

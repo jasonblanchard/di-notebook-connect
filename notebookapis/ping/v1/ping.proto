@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-package protobuf.ping.v1;
+package ping.v1;
 
-option go_package = "github.com/jasonblanchard/di-notebook-connect/gen/protobuf/ping/v1;pingv1";
+option go_package = "github.com/jasonblanchard/di-notebook-connect/gen/notebookapis/ping/v1;pingv1";
 
 message PingRequest {}
 
