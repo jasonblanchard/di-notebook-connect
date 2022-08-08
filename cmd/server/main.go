@@ -15,11 +15,15 @@ import (
 )
 
 func main() {
+	notebookStore := &MockNotebookStore{}
+
 	mux := http.NewServeMux()
 	pingService := &pingv1.Service{}
 	pingpath, pinghandler := pingv1connect.NewPingServiceHandler(pingService)
 	mux.Handle(pingpath, pinghandler)
-	notebookService := &notebookv1.Service{}
+	notebookService := &notebookv1.Service{
+		Store: notebookStore,
+	}
 	notebookpath, notebookhandler := notebookv1connect.NewNotebookServiceHandler(notebookService)
 	mux.Handle(notebookpath, notebookhandler)
 	fmt.Println("Starting server on port 8080")

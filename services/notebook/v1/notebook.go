@@ -2,25 +2,39 @@ package notebookv1
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/bufbuild/connect-go"
 	notebookv1 "github.com/jasonblanchard/di-notebook-connect/gen/proto/go/notebookapis/notebook/v1"
+	notebookstore "github.com/jasonblanchard/di-notebook-connect/gen/sqlc/notebook"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-type Service struct{}
+type Store interface {
+	GetEntry(ctx context.Context, id int32) (notebookstore.GetEntryRow, error)
+}
+
+type Service struct {
+	Store Store
+}
 
 func (s *Service) GetEntry(ctx context.Context, req *connect.Request[notebookv1.GetEntryRequest]) (*connect.Response[notebookv1.GetEntryResponse], error) {
+	entryRow, err := s.Store.GetEntry(ctx, req.Msg.Id)
+
+	if err != nil {
+		return nil, connect.NewError(connect.CodeUnauthenticated, fmt.Errorf("error getting from store: %w", err))
+	}
+
 	res := connect.NewResponse(&notebookv1.GetEntryResponse{
 		Entry: &notebookv1.Entry{
-			Id:        "1",
-			Text:      "I am an entry",
-			CreatorId: "123",
+			Id:        entryRow.ID,
+			Text:      entryRow.Text.String,
+			CreatorId: entryRow.CreatorID,
 			CreatedAt: &timestamppb.Timestamp{
-				Seconds: 1659831878,
+				Seconds: entryRow.CreatedAt.Unix(),
 			},
 			UpdatedAt: &timestamppb.Timestamp{
-				Seconds: 1659831878,
+				Seconds: entryRow.UpdatedAt.Time.Unix(),
 			},
 		},
 	})
@@ -34,7 +48,7 @@ func (s *Service) ListEntries(ctx context.Context, req *connect.Request[notebook
 		HasNextPage:   true,
 		Entries: []*notebookv1.Entry{
 			{
-				Id:        "123",
+				Id:        123,
 				Text:      "I am an entry",
 				CreatorId: "123",
 				CreatedAt: &timestamppb.Timestamp{
@@ -45,7 +59,7 @@ func (s *Service) ListEntries(ctx context.Context, req *connect.Request[notebook
 				},
 			},
 			{
-				Id:        "456",
+				Id:        456,
 				Text:      "I am another entry",
 				CreatorId: "123",
 				CreatedAt: &timestamppb.Timestamp{

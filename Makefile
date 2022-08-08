@@ -3,5 +3,5 @@
 protobuf:
 	buf generate
 
-# store:
-# 	sqlc generate
+store:
+	sqlc generate

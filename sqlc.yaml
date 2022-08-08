@@ -1,0 +1,7 @@
+version: 1
+packages:
+  - path: "gen/sqlc/notebook"
+    name: "notebook"
+    engine: "postgresql"
+    schema: "migrations"
+    queries: "services/notebook/store/query.sql"
