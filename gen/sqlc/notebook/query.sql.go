@@ -11,14 +11,44 @@ import (
 	"time"
 )
 
-const getEntry = `-- name: GetEntry :one
+const createEntry = `-- name: CreateEntry :one
+
+INSERT INTO entries (text, creator_id, created_at)
+VALUES ($1, $2, $3)
+RETURNING id
+`
+
+type CreateEntryParams struct {
+	Text      sql.NullString
+	CreatorID string
+	CreatedAt time.Time
+}
+
+// -- name: GetDeletedEntry :one
+// SELECT id, text, creator_id, created_at, updated_at
+// FROM entries
+// WHERE id = $1
+// AND delete_time IS NOT NULL;
+func (q *Queries) CreateEntry(ctx context.Context, arg CreateEntryParams) (int32, error) {
+	row := q.db.QueryRowContext(ctx, createEntry, arg.Text, arg.CreatorID, arg.CreatedAt)
+	var id int32
+	err := row.Scan(&id)
+	return id, err
+}
+
+const getEntryByIdAndAuthor = `-- name: GetEntryByIdAndAuthor :one
 SELECT id, text, creator_id, created_at, updated_at
 FROM entries
-WHERE id = $1
+WHERE id = $1 AND creator_id = $2
 AND delete_time IS NULL
 `
 
-type GetEntryRow struct {
+type GetEntryByIdAndAuthorParams struct {
+	ID        int32
+	CreatorID string
+}
+
+type GetEntryByIdAndAuthorRow struct {
 	ID        int32
 	Text      sql.NullString
 	CreatorID string
@@ -26,9 +56,44 @@ type GetEntryRow struct {
 	UpdatedAt sql.NullTime
 }
 
-func (q *Queries) GetEntry(ctx context.Context, id int32) (GetEntryRow, error) {
-	row := q.db.QueryRowContext(ctx, getEntry, id)
-	var i GetEntryRow
+func (q *Queries) GetEntryByIdAndAuthor(ctx context.Context, arg GetEntryByIdAndAuthorParams) (GetEntryByIdAndAuthorRow, error) {
+	row := q.db.QueryRowContext(ctx, getEntryByIdAndAuthor, arg.ID, arg.CreatorID)
+	var i GetEntryByIdAndAuthorRow
+	err := row.Scan(
+		&i.ID,
+		&i.Text,
+		&i.CreatorID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const updateEntryText = `-- name: UpdateEntryText :one
+UPDATE entries
+SET text = $1, updated_at = $2
+WHERE id = $3
+AND delete_time is null
+RETURNING id, text, creator_id, created_at, updated_at
+`
+
+type UpdateEntryTextParams struct {
+	Text      sql.NullString
+	UpdatedAt sql.NullTime
+	ID        int32
+}
+
+type UpdateEntryTextRow struct {
+	ID        int32
+	Text      sql.NullString
+	CreatorID string
+	CreatedAt time.Time
+	UpdatedAt sql.NullTime
+}
+
+func (q *Queries) UpdateEntryText(ctx context.Context, arg UpdateEntryTextParams) (UpdateEntryTextRow, error) {
+	row := q.db.QueryRowContext(ctx, updateEntryText, arg.Text, arg.UpdatedAt, arg.ID)
+	var i UpdateEntryTextRow
 	err := row.Scan(
 		&i.ID,
 		&i.Text,

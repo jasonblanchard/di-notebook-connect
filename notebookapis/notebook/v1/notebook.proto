@@ -13,28 +13,28 @@ message Entry {
   google.protobuf.Timestamp delete_time = 6;
 }
 
-message GetEntryRequest {
+message GetAuthorEntryRequest {
   int32 id = 1;
 }
 
-message GetEntryResponse {
+message GetAuthorEntryResponse {
   Entry entry = 1;
 }
 
-message CreateEntryRequest {
+message BeginNewEntryRequest {
   string text = 1;
 }
 
-message CreateEntryResponse {
+message BeginNewEntryResponse {
   Entry entry = 1;
 }
 
-message UpdateEntryRequest {
+message WriteToEntryRequest {
   int32 id = 1;
   string text = 2;
 }
 
-message UpdateEntryResponse {
+message WriteToEntryResponse {
   Entry entry = 1;
 }
 
@@ -67,13 +67,13 @@ message UndeleteEntryResponse {
 }
 
 service NotebookService {
-  rpc GetEntry(GetEntryRequest) returns (GetEntryResponse) {}
+  rpc GetAuthorEntry(GetAuthorEntryRequest) returns (GetAuthorEntryResponse) {}
 
-  // rpc CreateEntry(CreateEntryRequest) returns (CreateEntryResponse) {}
+  rpc BeginNewEntry(BeginNewEntryRequest) returns (BeginNewEntryResponse) {}
 
-  // rpc UpdateEntry(UpdateEntryRequest) returns (UpdateEntryResponse) {}
+  rpc WriteToEntry(WriteToEntryRequest) returns (WriteToEntryResponse) {}
 
-  rpc ListEntries(ListEntriesRequest) returns (ListEntriesResponse) {}
+  // rpc ListEntries(ListEntriesRequest) returns (ListEntriesResponse) {}
 
   // rpc DeleteEntry(DeleteEntryRequest) returns (DeleteEntryResponse) {}
 

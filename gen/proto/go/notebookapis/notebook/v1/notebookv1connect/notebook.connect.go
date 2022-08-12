@@ -27,8 +27,9 @@ const (
 
 // NotebookServiceClient is a client for the notebook.v1.NotebookService service.
 type NotebookServiceClient interface {
-	GetEntry(context.Context, *connect_go.Request[v1.GetEntryRequest]) (*connect_go.Response[v1.GetEntryResponse], error)
-	ListEntries(context.Context, *connect_go.Request[v1.ListEntriesRequest]) (*connect_go.Response[v1.ListEntriesResponse], error)
+	GetAuthorEntry(context.Context, *connect_go.Request[v1.GetAuthorEntryRequest]) (*connect_go.Response[v1.GetAuthorEntryResponse], error)
+	BeginNewEntry(context.Context, *connect_go.Request[v1.BeginNewEntryRequest]) (*connect_go.Response[v1.BeginNewEntryResponse], error)
+	WriteToEntry(context.Context, *connect_go.Request[v1.WriteToEntryRequest]) (*connect_go.Response[v1.WriteToEntryResponse], error)
 }
 
 // NewNotebookServiceClient constructs a client for the notebook.v1.NotebookService service. By
@@ -41,14 +42,19 @@ type NotebookServiceClient interface {
 func NewNotebookServiceClient(httpClient connect_go.HTTPClient, baseURL string, opts ...connect_go.ClientOption) NotebookServiceClient {
 	baseURL = strings.TrimRight(baseURL, "/")
 	return &notebookServiceClient{
-		getEntry: connect_go.NewClient[v1.GetEntryRequest, v1.GetEntryResponse](
+		getAuthorEntry: connect_go.NewClient[v1.GetAuthorEntryRequest, v1.GetAuthorEntryResponse](
 			httpClient,
-			baseURL+"/notebook.v1.NotebookService/GetEntry",
+			baseURL+"/notebook.v1.NotebookService/GetAuthorEntry",
 			opts...,
 		),
-		listEntries: connect_go.NewClient[v1.ListEntriesRequest, v1.ListEntriesResponse](
+		beginNewEntry: connect_go.NewClient[v1.BeginNewEntryRequest, v1.BeginNewEntryResponse](
 			httpClient,
-			baseURL+"/notebook.v1.NotebookService/ListEntries",
+			baseURL+"/notebook.v1.NotebookService/BeginNewEntry",
+			opts...,
+		),
+		writeToEntry: connect_go.NewClient[v1.WriteToEntryRequest, v1.WriteToEntryResponse](
+			httpClient,
+			baseURL+"/notebook.v1.NotebookService/WriteToEntry",
 			opts...,
 		),
 	}
@@ -56,24 +62,31 @@ func NewNotebookServiceClient(httpClient connect_go.HTTPClient, baseURL string, 
 
 // notebookServiceClient implements NotebookServiceClient.
 type notebookServiceClient struct {
-	getEntry    *connect_go.Client[v1.GetEntryRequest, v1.GetEntryResponse]
-	listEntries *connect_go.Client[v1.ListEntriesRequest, v1.ListEntriesResponse]
+	getAuthorEntry *connect_go.Client[v1.GetAuthorEntryRequest, v1.GetAuthorEntryResponse]
+	beginNewEntry  *connect_go.Client[v1.BeginNewEntryRequest, v1.BeginNewEntryResponse]
+	writeToEntry   *connect_go.Client[v1.WriteToEntryRequest, v1.WriteToEntryResponse]
 }
 
-// GetEntry calls notebook.v1.NotebookService.GetEntry.
-func (c *notebookServiceClient) GetEntry(ctx context.Context, req *connect_go.Request[v1.GetEntryRequest]) (*connect_go.Response[v1.GetEntryResponse], error) {
-	return c.getEntry.CallUnary(ctx, req)
+// GetAuthorEntry calls notebook.v1.NotebookService.GetAuthorEntry.
+func (c *notebookServiceClient) GetAuthorEntry(ctx context.Context, req *connect_go.Request[v1.GetAuthorEntryRequest]) (*connect_go.Response[v1.GetAuthorEntryResponse], error) {
+	return c.getAuthorEntry.CallUnary(ctx, req)
 }
 
-// ListEntries calls notebook.v1.NotebookService.ListEntries.
-func (c *notebookServiceClient) ListEntries(ctx context.Context, req *connect_go.Request[v1.ListEntriesRequest]) (*connect_go.Response[v1.ListEntriesResponse], error) {
-	return c.listEntries.CallUnary(ctx, req)
+// BeginNewEntry calls notebook.v1.NotebookService.BeginNewEntry.
+func (c *notebookServiceClient) BeginNewEntry(ctx context.Context, req *connect_go.Request[v1.BeginNewEntryRequest]) (*connect_go.Response[v1.BeginNewEntryResponse], error) {
+	return c.beginNewEntry.CallUnary(ctx, req)
+}
+
+// WriteToEntry calls notebook.v1.NotebookService.WriteToEntry.
+func (c *notebookServiceClient) WriteToEntry(ctx context.Context, req *connect_go.Request[v1.WriteToEntryRequest]) (*connect_go.Response[v1.WriteToEntryResponse], error) {
+	return c.writeToEntry.CallUnary(ctx, req)
 }
 
 // NotebookServiceHandler is an implementation of the notebook.v1.NotebookService service.
 type NotebookServiceHandler interface {
-	GetEntry(context.Context, *connect_go.Request[v1.GetEntryRequest]) (*connect_go.Response[v1.GetEntryResponse], error)
-	ListEntries(context.Context, *connect_go.Request[v1.ListEntriesRequest]) (*connect_go.Response[v1.ListEntriesResponse], error)
+	GetAuthorEntry(context.Context, *connect_go.Request[v1.GetAuthorEntryRequest]) (*connect_go.Response[v1.GetAuthorEntryResponse], error)
+	BeginNewEntry(context.Context, *connect_go.Request[v1.BeginNewEntryRequest]) (*connect_go.Response[v1.BeginNewEntryResponse], error)
+	WriteToEntry(context.Context, *connect_go.Request[v1.WriteToEntryRequest]) (*connect_go.Response[v1.WriteToEntryResponse], error)
 }
 
 // NewNotebookServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -83,14 +96,19 @@ type NotebookServiceHandler interface {
 // and JSON codecs. They also support gzip compression.
 func NewNotebookServiceHandler(svc NotebookServiceHandler, opts ...connect_go.HandlerOption) (string, http.Handler) {
 	mux := http.NewServeMux()
-	mux.Handle("/notebook.v1.NotebookService/GetEntry", connect_go.NewUnaryHandler(
-		"/notebook.v1.NotebookService/GetEntry",
-		svc.GetEntry,
+	mux.Handle("/notebook.v1.NotebookService/GetAuthorEntry", connect_go.NewUnaryHandler(
+		"/notebook.v1.NotebookService/GetAuthorEntry",
+		svc.GetAuthorEntry,
 		opts...,
 	))
-	mux.Handle("/notebook.v1.NotebookService/ListEntries", connect_go.NewUnaryHandler(
-		"/notebook.v1.NotebookService/ListEntries",
-		svc.ListEntries,
+	mux.Handle("/notebook.v1.NotebookService/BeginNewEntry", connect_go.NewUnaryHandler(
+		"/notebook.v1.NotebookService/BeginNewEntry",
+		svc.BeginNewEntry,
+		opts...,
+	))
+	mux.Handle("/notebook.v1.NotebookService/WriteToEntry", connect_go.NewUnaryHandler(
+		"/notebook.v1.NotebookService/WriteToEntry",
+		svc.WriteToEntry,
 		opts...,
 	))
 	return "/notebook.v1.NotebookService/", mux
@@ -99,10 +117,14 @@ func NewNotebookServiceHandler(svc NotebookServiceHandler, opts ...connect_go.Ha
 // UnimplementedNotebookServiceHandler returns CodeUnimplemented from all methods.
 type UnimplementedNotebookServiceHandler struct{}
 
-func (UnimplementedNotebookServiceHandler) GetEntry(context.Context, *connect_go.Request[v1.GetEntryRequest]) (*connect_go.Response[v1.GetEntryResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("notebook.v1.NotebookService.GetEntry is not implemented"))
+func (UnimplementedNotebookServiceHandler) GetAuthorEntry(context.Context, *connect_go.Request[v1.GetAuthorEntryRequest]) (*connect_go.Response[v1.GetAuthorEntryResponse], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("notebook.v1.NotebookService.GetAuthorEntry is not implemented"))
 }
 
-func (UnimplementedNotebookServiceHandler) ListEntries(context.Context, *connect_go.Request[v1.ListEntriesRequest]) (*connect_go.Response[v1.ListEntriesResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("notebook.v1.NotebookService.ListEntries is not implemented"))
+func (UnimplementedNotebookServiceHandler) BeginNewEntry(context.Context, *connect_go.Request[v1.BeginNewEntryRequest]) (*connect_go.Response[v1.BeginNewEntryResponse], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("notebook.v1.NotebookService.BeginNewEntry is not implemented"))
+}
+
+func (UnimplementedNotebookServiceHandler) WriteToEntry(context.Context, *connect_go.Request[v1.WriteToEntryRequest]) (*connect_go.Response[v1.WriteToEntryResponse], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("notebook.v1.NotebookService.WriteToEntry is not implemented"))
 }
