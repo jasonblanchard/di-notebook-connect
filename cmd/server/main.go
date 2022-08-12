@@ -6,6 +6,7 @@ import (
 
 	"github.com/jasonblanchard/di-notebook-connect/gen/proto/go/notebookapis/notebook/v1/notebookv1connect"
 	"github.com/jasonblanchard/di-notebook-connect/gen/proto/go/notebookapis/ping/v1/pingv1connect"
+	"go.uber.org/zap"
 
 	"database/sql"
 
@@ -18,27 +19,41 @@ import (
 )
 
 func main() {
-	// TODO: Fix this string
-	db, err := sql.Open("postgres", "user=pqgotest dbname=pqgotest sslmode=verify-full")
+	db, err := sql.Open("postgres", "user=postgres host=localhost port=50162 dbname=postgres password=mysecretpassword sslmode=disable")
 	if err != nil {
 		panic(err)
 	}
 
 	store := notebookstore.New(db)
 
+	logger, err := zap.NewProduction()
+	if err != nil {
+		panic(err)
+	}
+	sugaredLogger := logger.Sugar()
+
 	mux := http.NewServeMux()
+
 	pingService := &pingv1.Service{}
 	pingpath, pinghandler := pingv1connect.NewPingServiceHandler(pingService)
 	mux.Handle(pingpath, pinghandler)
+
 	notebookService := &notebookv1.Service{
-		Store: store,
+		Store:  store,
+		Logger: sugaredLogger,
 	}
+
+	// TODO: Interceptor for translating `Authorization: Bearer aaa.bbb.ccc` JWT to x-principal-id https://connect.build/docs/go/interceptors
 	notebookpath, notebookhandler := notebookv1connect.NewNotebookServiceHandler(notebookService)
 	mux.Handle(notebookpath, notebookhandler)
+
 	fmt.Println("Starting server on port 8080")
+
+	wrappedMux := NewWithLogger(mux, sugaredLogger)
+
 	http.ListenAndServe(
 		"localhost:8080",
 		// Use h2c so we can serve HTTP/2 without TLS.
-		h2c.NewHandler(mux, &http2.Server{}),
+		h2c.NewHandler(wrappedMux, &http2.Server{}),
 	)
 }

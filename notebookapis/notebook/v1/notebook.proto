@@ -13,11 +13,11 @@ message Entry {
   google.protobuf.Timestamp delete_time = 6;
 }
 
-message GetAuthorEntryRequest {
+message ReadAuthorEntryRequest {
   int32 id = 1;
 }
 
-message GetAuthorEntryResponse {
+message ReadAuthorEntryResponse {
   Entry entry = 1;
 }
 
@@ -40,12 +40,12 @@ message WriteToEntryResponse {
 
 message ListEntriesRequest {
   int32 page_size = 1;
-  string page_token = 2;
+  int32 page_token = 2;
 }
 
 message ListEntriesResponse {
   repeated Entry entries = 1;
-  string next_page_token = 2;
+  int32 next_page_token = 2;
   int32 total_size = 3;
   bool has_next_page = 4;
 }
@@ -58,24 +58,24 @@ message DeleteEntryResponse {
   Entry entry = 1;
 }
 
-message UndeleteEntryRequest {
+message UnDeleteEntryRequest {
   int32 id = 1;
 }
 
-message UndeleteEntryResponse {
+message UnDeleteEntryResponse {
   Entry entry = 1;
 }
 
 service NotebookService {
-  rpc GetAuthorEntry(GetAuthorEntryRequest) returns (GetAuthorEntryResponse) {}
+  rpc ReadAuthorEntry(ReadAuthorEntryRequest) returns (ReadAuthorEntryResponse) {}
 
   rpc BeginNewEntry(BeginNewEntryRequest) returns (BeginNewEntryResponse) {}
 
   rpc WriteToEntry(WriteToEntryRequest) returns (WriteToEntryResponse) {}
 
-  // rpc ListEntries(ListEntriesRequest) returns (ListEntriesResponse) {}
+  rpc ListEntries(ListEntriesRequest) returns (ListEntriesResponse) {}
 
-  // rpc DeleteEntry(DeleteEntryRequest) returns (DeleteEntryResponse) {}
+  rpc DeleteEntry(DeleteEntryRequest) returns (DeleteEntryResponse) {}
 
-  // rpc UndeleteEntry(UndeleteEntryRequest) returns (UndeleteEntryResponse) {}
+  rpc UndeleteEntry(UnDeleteEntryRequest) returns (UnDeleteEntryResponse) {}
 }

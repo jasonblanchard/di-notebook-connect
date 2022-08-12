@@ -11,8 +11,45 @@ import (
 	"time"
 )
 
-const createEntry = `-- name: CreateEntry :one
+const countEntriesByAuthor = `-- name: CountEntriesByAuthor :one
+SELECT
+    count(*)
+FROM entries 
+WHERE
+	creator_id = $1
+	AND delete_time IS NULL
+`
 
+func (q *Queries) CountEntriesByAuthor(ctx context.Context, creatorID string) (int64, error) {
+	row := q.db.QueryRowContext(ctx, countEntriesByAuthor, creatorID)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
+const countEntriesByAuthorAfterCursor = `-- name: CountEntriesByAuthorAfterCursor :one
+SELECT
+    count(*)
+FROM entries 
+WHERE
+	creator_id = $1
+	AND delete_time IS NULL
+    AND id > $2
+`
+
+type CountEntriesByAuthorAfterCursorParams struct {
+	CreatorID string
+	ID        int32
+}
+
+func (q *Queries) CountEntriesByAuthorAfterCursor(ctx context.Context, arg CountEntriesByAuthorAfterCursorParams) (int64, error) {
+	row := q.db.QueryRowContext(ctx, countEntriesByAuthorAfterCursor, arg.CreatorID, arg.ID)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
+const createEntry = `-- name: CreateEntry :one
 INSERT INTO entries (text, creator_id, created_at)
 VALUES ($1, $2, $3)
 RETURNING id
@@ -24,16 +61,39 @@ type CreateEntryParams struct {
 	CreatedAt time.Time
 }
 
-// -- name: GetDeletedEntry :one
-// SELECT id, text, creator_id, created_at, updated_at
-// FROM entries
-// WHERE id = $1
-// AND delete_time IS NOT NULL;
 func (q *Queries) CreateEntry(ctx context.Context, arg CreateEntryParams) (int32, error) {
 	row := q.db.QueryRowContext(ctx, createEntry, arg.Text, arg.CreatorID, arg.CreatedAt)
 	var id int32
 	err := row.Scan(&id)
 	return id, err
+}
+
+const deleteEntryByIdAndAuthor = `-- name: DeleteEntryByIdAndAuthor :one
+UPDATE entries
+SET delete_time = $1
+WHERE id = $2
+AND creator_id = $3
+RETURNING id, text, creator_id, created_at, updated_at, delete_time
+`
+
+type DeleteEntryByIdAndAuthorParams struct {
+	DeleteTime sql.NullTime
+	ID         int32
+	CreatorID  string
+}
+
+func (q *Queries) DeleteEntryByIdAndAuthor(ctx context.Context, arg DeleteEntryByIdAndAuthorParams) (Entry, error) {
+	row := q.db.QueryRowContext(ctx, deleteEntryByIdAndAuthor, arg.DeleteTime, arg.ID, arg.CreatorID)
+	var i Entry
+	err := row.Scan(
+		&i.ID,
+		&i.Text,
+		&i.CreatorID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.DeleteTime,
+	)
+	return i, err
 }
 
 const getEntryByIdAndAuthor = `-- name: GetEntryByIdAndAuthor :one
@@ -65,6 +125,81 @@ func (q *Queries) GetEntryByIdAndAuthor(ctx context.Context, arg GetEntryByIdAnd
 		&i.CreatorID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const listEntriesByAuthor = `-- name: ListEntriesByAuthor :many
+SELECT
+	id, text, creator_id, created_at, updated_at, delete_time
+FROM
+	entries
+WHERE
+	creator_id = $1
+	AND delete_time IS NULL
+	AND id > $2
+LIMIT $3
+`
+
+type ListEntriesByAuthorParams struct {
+	CreatorID string
+	ID        int32
+	Limit     int32
+}
+
+func (q *Queries) ListEntriesByAuthor(ctx context.Context, arg ListEntriesByAuthorParams) ([]Entry, error) {
+	rows, err := q.db.QueryContext(ctx, listEntriesByAuthor, arg.CreatorID, arg.ID, arg.Limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Entry
+	for rows.Next() {
+		var i Entry
+		if err := rows.Scan(
+			&i.ID,
+			&i.Text,
+			&i.CreatorID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.DeleteTime,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const unDeleteEntryByIdAndAuthor = `-- name: UnDeleteEntryByIdAndAuthor :one
+UPDATE entries
+SET delete_time = NULL
+WHERE id = $1
+AND creator_id = $2
+RETURNING id, text, creator_id, created_at, updated_at, delete_time
+`
+
+type UnDeleteEntryByIdAndAuthorParams struct {
+	ID        int32
+	CreatorID string
+}
+
+func (q *Queries) UnDeleteEntryByIdAndAuthor(ctx context.Context, arg UnDeleteEntryByIdAndAuthorParams) (Entry, error) {
+	row := q.db.QueryRowContext(ctx, unDeleteEntryByIdAndAuthor, arg.ID, arg.CreatorID)
+	var i Entry
+	err := row.Scan(
+		&i.ID,
+		&i.Text,
+		&i.CreatorID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.DeleteTime,
 	)
 	return i, err
 }
