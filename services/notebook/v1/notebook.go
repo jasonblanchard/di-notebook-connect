@@ -110,6 +110,15 @@ func (s *Service) ListEntries(ctx context.Context, req *connect.Request[notebook
 		return nil, connect.NewError(connect.CodeUnknown, fmt.Errorf(connect.CodeUnknown.String()))
 	}
 
+	if len(entryRecords) == 0 {
+		res := connect.NewResponse(&notebookv1.ListEntriesResponse{
+			Entries:   entries,
+			TotalSize: 0,
+		})
+
+		return res, nil
+	}
+
 	lastEntryRecord := entryRecords[len(entryRecords)-1]
 
 	cursor := req.Msg.PageToken

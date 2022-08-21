@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/bufbuild/connect-go"
 	"github.com/jasonblanchard/di-notebook-connect/gen/proto/go/notebookapis/notebook/v1/notebookv1connect"
 	"github.com/jasonblanchard/di-notebook-connect/gen/proto/go/notebookapis/ping/v1/pingv1connect"
+	"github.com/jasonblanchard/di-notebook-connect/ingress"
 	"go.uber.org/zap"
 
 	"database/sql"
@@ -44,7 +46,9 @@ func main() {
 	}
 
 	// TODO: Interceptor for translating `Authorization: Bearer aaa.bbb.ccc` JWT to x-principal-id https://connect.build/docs/go/interceptors
-	notebookpath, notebookhandler := notebookv1connect.NewNotebookServiceHandler(notebookService)
+	interceptors := connect.WithInterceptors(ingress.NewAuthInterceptor())
+
+	notebookpath, notebookhandler := notebookv1connect.NewNotebookServiceHandler(notebookService, interceptors)
 	mux.Handle(notebookpath, notebookhandler)
 
 	fmt.Println("Starting server on port 8080")
