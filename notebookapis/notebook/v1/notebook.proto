@@ -3,6 +3,7 @@ syntax = "proto3";
 package notebook.v1;
 
 import "google/protobuf/timestamp.proto";
+import "google/protobuf/wrappers.proto";
 
 message Entry {
   int32 id = 1;
@@ -45,9 +46,9 @@ message ListEntriesRequest {
 
 message ListEntriesResponse {
   repeated Entry entries = 1;
-  int32 next_page_token = 2;
+  google.protobuf.Int32Value next_page_token = 2;
   int32 total_size = 3;
-  bool has_next_page = 4;
+  google.protobuf.BoolValue has_next_page = 4;
 }
 
 message DeleteEntryRequest {

@@ -36,7 +36,41 @@ func (s *MockStore) GetEntryByIdAndAuthor(ctx context.Context, params notebookst
 }
 
 func (s *MockStore) ListEntriesByAuthor(ctx context.Context, params notebookstore.ListEntriesByAuthorParams) ([]notebookstore.Entry, error) {
-	result := []notebookstore.Entry{}
+	result := []notebookstore.Entry{
+		{
+			ID: 1,
+			Text: sql.NullString{
+				String: "First entry",
+			},
+			CreatorID: "abc123",
+			CreatedAt: time.Now(),
+			UpdatedAt: sql.NullTime{
+				Time: time.Now(),
+			},
+		},
+		{
+			ID: 2,
+			Text: sql.NullString{
+				String: "Second entry",
+			},
+			CreatorID: "abc123",
+			CreatedAt: time.Now(),
+			UpdatedAt: sql.NullTime{
+				Time: time.Now(),
+			},
+		},
+		{
+			ID: 3,
+			Text: sql.NullString{
+				String: "Third entry",
+			},
+			CreatorID: "abc123",
+			CreatedAt: time.Now(),
+			UpdatedAt: sql.NullTime{
+				Time: time.Now(),
+			},
+		},
+	}
 
 	return result, nil
 }
@@ -97,6 +131,14 @@ func (s *MockStore) UnDeleteEntryByIdAndAuthor(ctx context.Context, params noteb
 	}
 
 	return *result, nil
+}
+
+func (s *MockStore) CountEntriesByAuthor(ctx context.Context, creatorID string) (int64, error) {
+	return 3, nil
+}
+
+func (s *MockStore) CountEntriesByAuthorAfterCursor(ctx context.Context, params notebookstore.CountEntriesByAuthorAfterCursorParams) (int64, error) {
+	return 1, nil
 }
 
 func TestReadAuthorEntry(t *testing.T) {
@@ -249,4 +291,25 @@ func TestUndeleteDeleteEntry(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.False(t, result.Msg.Entry.DeleteTime.IsValid())
+}
+
+func TestListEntries(t *testing.T) {
+	notebookStore := &MockStore{}
+	notebookService := &Service{
+		Store: notebookStore,
+	}
+	c := context.TODO()
+
+	req := &connect.Request[notebookv1.ListEntriesRequest]{
+		Msg: &notebookv1.ListEntriesRequest{
+			PageSize: 3,
+		},
+	}
+
+	req.Header().Set("x-principal-id", "abc123")
+
+	result, err := notebookService.ListEntries(c, req)
+
+	assert.Nil(t, err)
+	assert.Equal(t, 3, len(result.Msg.Entries))
 }

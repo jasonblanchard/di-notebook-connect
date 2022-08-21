@@ -12,6 +12,7 @@ import (
 	notebookstore "github.com/jasonblanchard/di-notebook-connect/gen/sqlc/notebook"
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/types/known/timestamppb"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
 type Store interface {
@@ -21,6 +22,8 @@ type Store interface {
 	DeleteEntryByIdAndAuthor(ctx context.Context, params notebookstore.DeleteEntryByIdAndAuthorParams) (notebookstore.Entry, error)
 	UnDeleteEntryByIdAndAuthor(ctx context.Context, params notebookstore.UnDeleteEntryByIdAndAuthorParams) (notebookstore.Entry, error)
 	ListEntriesByAuthor(ctx context.Context, params notebookstore.ListEntriesByAuthorParams) ([]notebookstore.Entry, error)
+	CountEntriesByAuthor(ctx context.Context, creatorID string) (int64, error)
+	CountEntriesByAuthorAfterCursor(ctx context.Context, params notebookstore.CountEntriesByAuthorAfterCursorParams) (int64, error)
 }
 
 type Service struct {
@@ -71,7 +74,6 @@ func (s *Service) ListEntries(ctx context.Context, req *connect.Request[notebook
 		return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("no principalId"))
 	}
 
-	// Get entries after token
 	entryRecords, err := s.Store.ListEntriesByAuthor(ctx, notebookstore.ListEntriesByAuthorParams{
 		CreatorID: principalId,
 		ID:        req.Msg.PageToken,
@@ -86,7 +88,6 @@ func (s *Service) ListEntries(ctx context.Context, req *connect.Request[notebook
 		return nil, connect.NewError(connect.CodeUnknown, fmt.Errorf(connect.CodeUnknown.String()))
 	}
 
-	// Get pagination info
 	entries := []*notebookv1.Entry{}
 
 	for _, entryRecord := range entryRecords {
@@ -103,10 +104,45 @@ func (s *Service) ListEntries(ctx context.Context, req *connect.Request[notebook
 		})
 	}
 
+	totalSize, err := s.Store.CountEntriesByAuthor(ctx, principalId)
+	if err != nil {
+		s.Logger.Errorf("error getting from store: %s", err)
+		return nil, connect.NewError(connect.CodeUnknown, fmt.Errorf(connect.CodeUnknown.String()))
+	}
+
+	lastEntryRecord := entryRecords[len(entryRecords)-1]
+
+	cursor := req.Msg.PageToken
+	if cursor == 0 {
+		cursor = lastEntryRecord.ID
+	}
+
+	countAfterCursor, err := s.Store.CountEntriesByAuthorAfterCursor(ctx, notebookstore.CountEntriesByAuthorAfterCursorParams{
+		CreatorID: principalId,
+		ID:        cursor,
+	})
+	if err != nil {
+		s.Logger.Errorf("error getting from store: %s", err)
+		return nil, connect.NewError(connect.CodeUnknown, fmt.Errorf(connect.CodeUnknown.String()))
+	}
+
+	hasNextPage := countAfterCursor > 0
+
+	var nextPageToken *wrapperspb.Int32Value
+
+	if hasNextPage {
+		nextPageToken = &wrapperspb.Int32Value{
+			Value: lastEntryRecord.ID,
+		}
+	}
+
 	res := connect.NewResponse(&notebookv1.ListEntriesResponse{
 		Entries:       entries,
-		NextPageToken: 123,
-		TotalSize:     10,
+		TotalSize:     int32(totalSize),
+		NextPageToken: nextPageToken,
+		HasNextPage: &wrapperspb.BoolValue{
+			Value: hasNextPage,
+		},
 	})
 
 	return res, nil
