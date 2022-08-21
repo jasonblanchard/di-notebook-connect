@@ -3,6 +3,8 @@ module github.com/jasonblanchard/di-notebook-connect
 go 1.18
 
 require (
+	github.com/aws/aws-lambda-go v1.34.1
+	github.com/awslabs/aws-lambda-go-api-proxy v0.13.3
 	github.com/bufbuild/connect-go v0.2.0
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/joho/godotenv v1.4.0

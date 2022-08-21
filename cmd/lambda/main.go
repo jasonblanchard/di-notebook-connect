@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/awslabs/aws-lambda-go-api-proxy/httpadapter"
 	"github.com/bufbuild/connect-go"
 	"github.com/jasonblanchard/di-notebook-connect/gen/proto/go/notebookapis/notebook/v1/notebookv1connect"
 	"github.com/jasonblanchard/di-notebook-connect/gen/proto/go/notebookapis/ping/v1/pingv1connect"
@@ -19,8 +21,6 @@ import (
 	pingv1 "github.com/jasonblanchard/di-notebook-connect/services/ping/v1"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
-	"golang.org/x/net/http2"
-	"golang.org/x/net/http2/h2c"
 )
 
 func main() {
@@ -62,16 +62,8 @@ func main() {
 
 	notebookpath, notebookhandler := notebookv1connect.NewNotebookServiceHandler(notebookService, interceptors)
 	mux.Handle(notebookpath, notebookhandler)
-
-	port := os.Getenv("PORT")
-
-	sugaredLogger.Infow("Starting server", "port", port)
-
 	wrappedMux := ingress.NewWithLogger(mux, sugaredLogger)
 
-	http.ListenAndServe(
-		fmt.Sprintf("0.0.0.0:%s", port),
-		// Use h2c so we can serve HTTP/2 without TLS.
-		h2c.NewHandler(wrappedMux, &http2.Server{}),
-	)
+	sugaredLogger.Info("Starting handler")
+	lambda.Start(httpadapter.NewV2(wrappedMux).ProxyWithContext)
 }
