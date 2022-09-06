@@ -10,7 +10,6 @@ import (
 	"github.com/awslabs/aws-lambda-go-api-proxy/httpadapter"
 	"github.com/bufbuild/connect-go"
 	"github.com/jasonblanchard/di-notebook-connect/gen/proto/go/notebookapis/notebook/v1/notebookv1connect"
-	"github.com/jasonblanchard/di-notebook-connect/gen/proto/go/notebookapis/ping/v1/pingv1connect"
 	"github.com/jasonblanchard/di-notebook-connect/ingress"
 	"go.uber.org/zap"
 
@@ -18,7 +17,6 @@ import (
 
 	notebookstore "github.com/jasonblanchard/di-notebook-connect/gen/sqlc/notebook"
 	notebookv1 "github.com/jasonblanchard/di-notebook-connect/services/notebook/v1"
-	pingv1 "github.com/jasonblanchard/di-notebook-connect/services/ping/v1"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )
@@ -48,10 +46,6 @@ func main() {
 	sugaredLogger := logger.Sugar()
 
 	mux := http.NewServeMux()
-
-	pingService := &pingv1.Service{}
-	pingpath, pinghandler := pingv1connect.NewPingServiceHandler(pingService)
-	mux.Handle(pingpath, pinghandler)
 
 	notebookService := &notebookv1.Service{
 		Store:  store,

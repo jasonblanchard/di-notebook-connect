@@ -8,7 +8,6 @@ import (
 
 	"github.com/bufbuild/connect-go"
 	"github.com/jasonblanchard/di-notebook-connect/gen/proto/go/notebookapis/notebook/v1/notebookv1connect"
-	"github.com/jasonblanchard/di-notebook-connect/gen/proto/go/notebookapis/ping/v1/pingv1connect"
 	"github.com/jasonblanchard/di-notebook-connect/ingress"
 	"go.uber.org/zap"
 
@@ -16,7 +15,6 @@ import (
 
 	notebookstore "github.com/jasonblanchard/di-notebook-connect/gen/sqlc/notebook"
 	notebookv1 "github.com/jasonblanchard/di-notebook-connect/services/notebook/v1"
-	pingv1 "github.com/jasonblanchard/di-notebook-connect/services/ping/v1"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	"golang.org/x/net/http2"
@@ -47,27 +45,23 @@ func main() {
 	}
 	sugaredLogger := logger.Sugar()
 
-	mux := http.NewServeMux()
-
-	pingService := &pingv1.Service{}
-	pingpath, pinghandler := pingv1connect.NewPingServiceHandler(pingService)
-	mux.Handle(pingpath, pinghandler)
+	rootMux := http.NewServeMux()
 
 	notebookService := &notebookv1.Service{
 		Store:  store,
 		Logger: sugaredLogger,
 	}
-
 	interceptors := connect.WithInterceptors(ingress.NewAuthInterceptor())
-
 	notebookpath, notebookhandler := notebookv1connect.NewNotebookServiceHandler(notebookService, interceptors)
-	mux.Handle(notebookpath, notebookhandler)
+	// notebookMux := http.NewServeMux()
+	rootMux.Handle(notebookpath, notebookhandler)
+	// rootMux.Handle("/connect/", http.StripPrefix("/connect/", notebookMux))
 
 	port := os.Getenv("PORT")
 
 	sugaredLogger.Infow("Starting server", "port", port)
 
-	wrappedMux := ingress.NewWithLogger(mux, sugaredLogger)
+	wrappedMux := ingress.NewWithLogger(rootMux, sugaredLogger)
 
 	http.ListenAndServe(
 		fmt.Sprintf("0.0.0.0:%s", port),

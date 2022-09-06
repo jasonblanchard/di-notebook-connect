@@ -27,6 +27,7 @@ const (
 
 // NotebookServiceClient is a client for the notebook.v1.NotebookService service.
 type NotebookServiceClient interface {
+	Ping(context.Context, *connect_go.Request[v1.PingRequest]) (*connect_go.Response[v1.PingResponse], error)
 	ReadAuthorEntry(context.Context, *connect_go.Request[v1.ReadAuthorEntryRequest]) (*connect_go.Response[v1.ReadAuthorEntryResponse], error)
 	BeginNewEntry(context.Context, *connect_go.Request[v1.BeginNewEntryRequest]) (*connect_go.Response[v1.BeginNewEntryResponse], error)
 	WriteToEntry(context.Context, *connect_go.Request[v1.WriteToEntryRequest]) (*connect_go.Response[v1.WriteToEntryResponse], error)
@@ -45,6 +46,11 @@ type NotebookServiceClient interface {
 func NewNotebookServiceClient(httpClient connect_go.HTTPClient, baseURL string, opts ...connect_go.ClientOption) NotebookServiceClient {
 	baseURL = strings.TrimRight(baseURL, "/")
 	return &notebookServiceClient{
+		ping: connect_go.NewClient[v1.PingRequest, v1.PingResponse](
+			httpClient,
+			baseURL+"/notebook.v1.NotebookService/Ping",
+			opts...,
+		),
 		readAuthorEntry: connect_go.NewClient[v1.ReadAuthorEntryRequest, v1.ReadAuthorEntryResponse](
 			httpClient,
 			baseURL+"/notebook.v1.NotebookService/ReadAuthorEntry",
@@ -80,12 +86,18 @@ func NewNotebookServiceClient(httpClient connect_go.HTTPClient, baseURL string, 
 
 // notebookServiceClient implements NotebookServiceClient.
 type notebookServiceClient struct {
+	ping            *connect_go.Client[v1.PingRequest, v1.PingResponse]
 	readAuthorEntry *connect_go.Client[v1.ReadAuthorEntryRequest, v1.ReadAuthorEntryResponse]
 	beginNewEntry   *connect_go.Client[v1.BeginNewEntryRequest, v1.BeginNewEntryResponse]
 	writeToEntry    *connect_go.Client[v1.WriteToEntryRequest, v1.WriteToEntryResponse]
 	listEntries     *connect_go.Client[v1.ListEntriesRequest, v1.ListEntriesResponse]
 	deleteEntry     *connect_go.Client[v1.DeleteEntryRequest, v1.DeleteEntryResponse]
 	undeleteEntry   *connect_go.Client[v1.UnDeleteEntryRequest, v1.UnDeleteEntryResponse]
+}
+
+// Ping calls notebook.v1.NotebookService.Ping.
+func (c *notebookServiceClient) Ping(ctx context.Context, req *connect_go.Request[v1.PingRequest]) (*connect_go.Response[v1.PingResponse], error) {
+	return c.ping.CallUnary(ctx, req)
 }
 
 // ReadAuthorEntry calls notebook.v1.NotebookService.ReadAuthorEntry.
@@ -120,6 +132,7 @@ func (c *notebookServiceClient) UndeleteEntry(ctx context.Context, req *connect_
 
 // NotebookServiceHandler is an implementation of the notebook.v1.NotebookService service.
 type NotebookServiceHandler interface {
+	Ping(context.Context, *connect_go.Request[v1.PingRequest]) (*connect_go.Response[v1.PingResponse], error)
 	ReadAuthorEntry(context.Context, *connect_go.Request[v1.ReadAuthorEntryRequest]) (*connect_go.Response[v1.ReadAuthorEntryResponse], error)
 	BeginNewEntry(context.Context, *connect_go.Request[v1.BeginNewEntryRequest]) (*connect_go.Response[v1.BeginNewEntryResponse], error)
 	WriteToEntry(context.Context, *connect_go.Request[v1.WriteToEntryRequest]) (*connect_go.Response[v1.WriteToEntryResponse], error)
@@ -135,6 +148,11 @@ type NotebookServiceHandler interface {
 // and JSON codecs. They also support gzip compression.
 func NewNotebookServiceHandler(svc NotebookServiceHandler, opts ...connect_go.HandlerOption) (string, http.Handler) {
 	mux := http.NewServeMux()
+	mux.Handle("/notebook.v1.NotebookService/Ping", connect_go.NewUnaryHandler(
+		"/notebook.v1.NotebookService/Ping",
+		svc.Ping,
+		opts...,
+	))
 	mux.Handle("/notebook.v1.NotebookService/ReadAuthorEntry", connect_go.NewUnaryHandler(
 		"/notebook.v1.NotebookService/ReadAuthorEntry",
 		svc.ReadAuthorEntry,
@@ -170,6 +188,10 @@ func NewNotebookServiceHandler(svc NotebookServiceHandler, opts ...connect_go.Ha
 
 // UnimplementedNotebookServiceHandler returns CodeUnimplemented from all methods.
 type UnimplementedNotebookServiceHandler struct{}
+
+func (UnimplementedNotebookServiceHandler) Ping(context.Context, *connect_go.Request[v1.PingRequest]) (*connect_go.Response[v1.PingResponse], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("notebook.v1.NotebookService.Ping is not implemented"))
+}
 
 func (UnimplementedNotebookServiceHandler) ReadAuthorEntry(context.Context, *connect_go.Request[v1.ReadAuthorEntryRequest]) (*connect_go.Response[v1.ReadAuthorEntryResponse], error) {
 	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("notebook.v1.NotebookService.ReadAuthorEntry is not implemented"))

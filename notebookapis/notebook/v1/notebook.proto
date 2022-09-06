@@ -67,7 +67,15 @@ message UnDeleteEntryResponse {
   Entry entry = 1;
 }
 
+message PingRequest {}
+
+message PingResponse {
+  string sound = 1;
+}
+
 service NotebookService {
+  rpc Ping(PingRequest) returns (PingResponse) {}
+
   rpc ReadAuthorEntry(ReadAuthorEntryRequest) returns (ReadAuthorEntryResponse) {}
 
   rpc BeginNewEntry(BeginNewEntryRequest) returns (BeginNewEntryResponse) {}

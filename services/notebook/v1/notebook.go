@@ -328,3 +328,10 @@ func (s *Service) UndeleteEntry(ctx context.Context, req *connect.Request[notebo
 
 	return res, nil
 }
+
+func (s *Service) Ping(ctx context.Context, req *connect.Request[notebookv1.PingRequest]) (*connect.Response[notebookv1.PingResponse], error) {
+	res := connect.NewResponse(&notebookv1.PingResponse{
+		Sound: "pong",
+	})
+	return res, nil
+}

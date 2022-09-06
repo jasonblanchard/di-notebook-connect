@@ -10,4 +10,4 @@ store:
 	sqlc generate
 
 migrate:
-	migrate --source file://migrations --database postgres://postgres:mysecretpassword@localhost:52926/postgres?sslmode=disable up
+	migrate --source file://migrations --database postgres://postgres:mysecretpassword@localhost:51564/postgres?sslmode=disable up
