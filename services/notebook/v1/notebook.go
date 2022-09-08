@@ -76,7 +76,7 @@ func (s *Service) ListEntries(ctx context.Context, req *connect.Request[notebook
 
 	entryRecords, err := s.Store.ListEntriesByAuthor(ctx, notebookstore.ListEntriesByAuthorParams{
 		CreatorID: principalId,
-		ID:        req.Msg.PageToken,
+		Cursor:    req.Msg.PageToken,
 		Limit:     req.Msg.PageSize,
 	})
 
@@ -121,21 +121,18 @@ func (s *Service) ListEntries(ctx context.Context, req *connect.Request[notebook
 
 	lastEntryRecord := entryRecords[len(entryRecords)-1]
 
-	cursor := req.Msg.PageToken
-	if cursor == 0 {
-		cursor = lastEntryRecord.ID
-	}
+	nextCursor := lastEntryRecord.ID
 
-	countAfterCursor, err := s.Store.CountEntriesByAuthorAfterCursor(ctx, notebookstore.CountEntriesByAuthorAfterCursorParams{
+	countAfterNextCursor, err := s.Store.CountEntriesByAuthorAfterCursor(ctx, notebookstore.CountEntriesByAuthorAfterCursorParams{
 		CreatorID: principalId,
-		ID:        cursor,
+		Cursor:    nextCursor,
 	})
 	if err != nil {
 		s.Logger.Errorf("error getting from store: %s", err)
 		return nil, connect.NewError(connect.CodeUnknown, fmt.Errorf(connect.CodeUnknown.String()))
 	}
 
-	hasNextPage := countAfterCursor > 0
+	hasNextPage := countAfterNextCursor > 0
 
 	var nextPageToken *wrapperspb.Int32Value
 

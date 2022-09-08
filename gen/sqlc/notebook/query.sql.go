@@ -32,18 +32,31 @@ SELECT
     count(*)
 FROM entries 
 WHERE
-	creator_id = $1
+	entries.creator_id = $1
 	AND delete_time IS NULL
-    AND id > $2
+    AND id < CASE WHEN $2::int = 0 THEN
+	(
+		SELECT
+			id
+		FROM
+			entries
+		WHERE
+			creator_id = $1
+			AND delete_time IS NULL
+		ORDER BY
+			id DESC
+		LIMIT 1)
+		WHEN $2::int != 0 THEN $2::int
+	END
 `
 
 type CountEntriesByAuthorAfterCursorParams struct {
 	CreatorID string
-	ID        int32
+	Cursor    int32
 }
 
 func (q *Queries) CountEntriesByAuthorAfterCursor(ctx context.Context, arg CountEntriesByAuthorAfterCursorParams) (int64, error) {
-	row := q.db.QueryRowContext(ctx, countEntriesByAuthorAfterCursor, arg.CreatorID, arg.ID)
+	row := q.db.QueryRowContext(ctx, countEntriesByAuthorAfterCursor, arg.CreatorID, arg.Cursor)
 	var count int64
 	err := row.Scan(&count)
 	return count, err
@@ -135,20 +148,35 @@ SELECT
 FROM
 	entries
 WHERE
-	creator_id = $1
-	AND delete_time IS NULL
-	AND id > $2
-LIMIT $3
+	entries.creator_id = $1
+	AND entries.delete_time IS NULL
+	AND entries.id < CASE WHEN $3::int = 0 THEN
+	(
+		SELECT
+			id
+		FROM
+			entries
+		WHERE
+			creator_id = $1
+			AND delete_time IS NULL
+		ORDER BY
+			id DESC
+		LIMIT 1)
+		WHEN $3::int != 0 THEN $3::int
+	END
+ORDER BY
+	id DESC
+LIMIT $2
 `
 
 type ListEntriesByAuthorParams struct {
 	CreatorID string
-	ID        int32
 	Limit     int32
+	Cursor    int32
 }
 
 func (q *Queries) ListEntriesByAuthor(ctx context.Context, arg ListEntriesByAuthorParams) ([]Entry, error) {
-	rows, err := q.db.QueryContext(ctx, listEntriesByAuthor, arg.CreatorID, arg.ID, arg.Limit)
+	rows, err := q.db.QueryContext(ctx, listEntriesByAuthor, arg.CreatorID, arg.Limit, arg.Cursor)
 	if err != nil {
 		return nil, err
 	}

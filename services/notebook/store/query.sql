@@ -10,10 +10,25 @@ SELECT
 FROM
 	entries
 WHERE
-	creator_id = $1
-	AND delete_time IS NULL
-	AND id > $2
-LIMIT $3;
+	entries.creator_id = $1
+	AND entries.delete_time IS NULL
+	AND entries.id < CASE WHEN sqlc.arg(cursor)::int = 0 THEN
+	(
+		SELECT
+			id
+		FROM
+			entries
+		WHERE
+			creator_id = $1
+			AND delete_time IS NULL
+		ORDER BY
+			id DESC
+		LIMIT 1)
+		WHEN sqlc.arg(cursor)::int != 0 THEN sqlc.arg(cursor)::int
+	END
+ORDER BY
+	id DESC
+LIMIT $2;
 
 -- name: CountEntriesByAuthor :one
 SELECT
@@ -28,9 +43,22 @@ SELECT
     count(*)
 FROM entries 
 WHERE
-	creator_id = $1
+	entries.creator_id = $1
 	AND delete_time IS NULL
-    AND id > $2;
+    AND id < CASE WHEN sqlc.arg(cursor)::int = 0 THEN
+	(
+		SELECT
+			id
+		FROM
+			entries
+		WHERE
+			creator_id = $1
+			AND delete_time IS NULL
+		ORDER BY
+			id DESC
+		LIMIT 1)
+		WHEN sqlc.arg(cursor)::int != 0 THEN sqlc.arg(cursor)::int
+	END;
 
 -- name: CreateEntry :one
 INSERT INTO entries (text, creator_id, created_at)
