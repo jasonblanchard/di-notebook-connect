@@ -12,7 +12,7 @@ FROM
 WHERE
 	entries.creator_id = $1
 	AND entries.delete_time IS NULL
-	AND entries.id < CASE WHEN sqlc.arg(cursor)::int = 0 THEN
+	AND entries.id <= CASE WHEN sqlc.arg(cursor)::int = 0 THEN
 	(
 		SELECT
 			id
@@ -24,7 +24,7 @@ WHERE
 		ORDER BY
 			id DESC
 		LIMIT 1)
-		WHEN sqlc.arg(cursor)::int != 0 THEN sqlc.arg(cursor)::int
+		WHEN sqlc.arg(cursor)::int != 0 THEN sqlc.arg(cursor)::int - 1
 	END
 ORDER BY
 	id DESC

@@ -59,11 +59,15 @@ func (s *Service) ReadAuthorEntry(ctx context.Context, req *connect.Request[note
 			CreatedAt: &timestamppb.Timestamp{
 				Seconds: entryRecord.CreatedAt.Unix(),
 			},
-			UpdatedAt: &timestamppb.Timestamp{
-				Seconds: entryRecord.UpdatedAt.Time.Unix(),
-			},
 		},
 	})
+
+	if !entryRecord.UpdatedAt.Time.IsZero() {
+		res.Msg.Entry.UpdatedAt = &timestamppb.Timestamp{
+			Seconds: entryRecord.UpdatedAt.Time.Unix(),
+		}
+	}
+
 	return res, nil
 }
 

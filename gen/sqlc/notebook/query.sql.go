@@ -150,7 +150,7 @@ FROM
 WHERE
 	entries.creator_id = $1
 	AND entries.delete_time IS NULL
-	AND entries.id < CASE WHEN $3::int = 0 THEN
+	AND entries.id <= CASE WHEN $3::int = 0 THEN
 	(
 		SELECT
 			id
@@ -162,7 +162,7 @@ WHERE
 		ORDER BY
 			id DESC
 		LIMIT 1)
-		WHEN $3::int != 0 THEN $3::int
+		WHEN $3::int != 0 THEN $3::int - 1
 	END
 ORDER BY
 	id DESC
