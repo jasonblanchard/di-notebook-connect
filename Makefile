@@ -10,4 +10,7 @@ store:
 	sqlc generate
 
 migrate:
-	migrate --source file://migrations --database postgres://postgres:mysecretpassword@localhost:63372/postgres?sslmode=disable up
+	migrate --source file://migrations --database postgres://postgres:mysecretpassword@localhost:5432/postgres?sslmode=disable up
+
+docker:
+	docker-compose up -d
