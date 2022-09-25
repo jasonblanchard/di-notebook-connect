@@ -61,3 +61,5 @@ Temporary Items
 
 .vscode
 .env
+bin
+.terraform

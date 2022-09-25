@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 
@@ -17,16 +16,10 @@ import (
 
 	notebookstore "github.com/jasonblanchard/di-notebook-connect/gen/sqlc/notebook"
 	notebookv1 "github.com/jasonblanchard/di-notebook-connect/services/notebook/v1"
-	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )
 
 func main() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
-
 	pghost := os.Getenv("PGHOST")
 	pgport := os.Getenv("PGPORT")
 	pgdatabase := os.Getenv("PGDATABASE")
